@@ -1,72 +1,38 @@
 
 const express = require('express')
 const Sequelize = require('sequelize');
+const path = require('path')
+const bodyParser = require('body-parser')
 
 var app = express();
+app.use(bodyParser.json())
 
-app.get('/', function (req, res) {
-  res.send('Hello World!');
-});
+const getRegistered = require('./routes/routes')
+const getLogin = require('./routes/routes')
+const sequelize = require('./util/database')
+
+app.use(bodyParser.urlencoded({extended: false}));
+app.use(express.static(path.join(__dirname, 'public')));
 
 
-//setting up connection
-//=============================>databse ====>username
+app.use(getRegistered)
+//app.use(getLogin)
 
-const sequelize = new Sequelize('postgres', 'postgres', 'test123', {
-  host: 'localhost',
-  dialect:'postgres'
-});
 
-//checking the connection is Ok or not
 
 sequelize
-  .authenticate()
-  .then(() => {
-    console.log('successfully');
-  })
-  .catch(err => {
-    console.error('Unable to connect to the database:', err);
-  });
+.sync({force :true}).then(result =>{
+	// console.log(result)
+})
+.catch(err =>{
+	console.log(err)
+})
 
-  //Modeling the Table
-
-const Model = Sequelize.Model;
-
-class User extends Model {}
-User.init({
-  
-  firstName: {
-    type: Sequelize.STRING,
-    allowNull: false
-  },
-
-  lastName: {
-    type: Sequelize.STRING
-   
-  }
-}, {
-  sequelize,
-  modelName: 'userData'
- 
-});
-
-
-User.sync().then(() => {
-  
-  return User.create({
-    firstName: 'John',
-    lastName: 'Hancock'
-  });
-
-});
-
-
-User.findAll().then(users => {
-  console.log("All users:", JSON.stringify(users, null, 4));
-}).catch(err => {
-	console.log("err2432423423 =====>>>", err);
-});
+app.get('/', (req, res)=>{
+	res.send("<h3>Dilip</h3>")
+})
 
 app.listen(4000, function () {
   console.log('Example app listening on port 4000!');
 });
+
